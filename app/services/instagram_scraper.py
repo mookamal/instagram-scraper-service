@@ -87,7 +87,7 @@ class InstagramPostScraper:
 
             # 4. Wait for XHR requests to load (Original fixed wait)
             # print("Waiting for network requests...") # Commented out direct print
-            time.sleep(6)
+            time.sleep(5)
 
             # 5. Gather all performance logs
             # print("Gathering performance logs...") # Commented out direct print
