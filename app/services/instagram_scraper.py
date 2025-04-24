@@ -79,6 +79,9 @@ class InstagramPostScraper:
 
         options = uc.ChromeOptions()
         options.headless = self.headless
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-gpu')
         # handler proxy
         if self.use_proxy:
             if self.proxies is None:
