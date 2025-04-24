@@ -104,7 +104,7 @@ class InstagramPostScraper:
             driver.get(url)
 
             # 4. Wait for XHR requests to load (Original fixed wait)
-            # print("Waiting for network requests...") # Commented out direct print
+            logger.info(f"Waiting for {self.wait_time} seconds...")
             time.sleep(self.wait_time)
 
             # 5. Gather all performance logs
