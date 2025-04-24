@@ -100,7 +100,7 @@ class InstagramPostScraper:
             self.sessions[proxy] = sess
         return sess
 
-    def _fetch_likes_via_graphql(self, session: ProxySession, shortcode: str) -> int | None:
+    def _fetch_likes_via_graphql(self, session: ProxySession, shortcode: str, proxy: str) -> int | None:
         """
         Uses requests.post with session.cookies and session.user_agent
         to call the Instagram GraphQL endpoint and parse exact like count.
@@ -138,7 +138,8 @@ class InstagramPostScraper:
             headers=headers,
             cookies=session.cookies,
             data=payload,
-            timeout=10
+            timeout=10,
+            proxies={"https": proxy, "http": proxy}
         )
         if resp.status_code != 200:
             logger.error(f"GraphQL failed [{resp.status_code}]: {resp.text}")
@@ -157,7 +158,7 @@ class InstagramPostScraper:
         """
         proxy = random.choice(self.proxies)
         session = self._get_session(proxy)
-        return self._fetch_likes_via_graphql(session, shortcode)
+        return self._fetch_likes_via_graphql(session, shortcode, proxy)
 
 class InstagramUserScraper:
     """
@@ -223,7 +224,8 @@ class InstagramUserScraper:
             headers=headers,
             cookies=session.cookies,
             params=params,
-            timeout=10
+            timeout=10,
+            proxies={"https": proxy, "http": proxy}
         )
 
         if resp.status_code != 200:
