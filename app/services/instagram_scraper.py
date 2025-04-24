@@ -2,6 +2,7 @@ import time
 import json
 import undetected_chromedriver as uc
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+import random
 # Note: No new logging imports added as per request
 
 # --- Start: Original __del__ patch ---
@@ -23,13 +24,15 @@ class InstagramPostScraper:
     Scrapes Instagram post likes by intercepting network requests.
     This class structure mirrors the logic of the original script.
     """
-    def __init__(self, headless: bool = True):
+    def __init__(self, headless: bool = True, use_proxy: bool = False, proxies: list[str] | None = None):
         """
         Initializes the scraper configuration.
         Args:
             headless (bool): Whether to run the browser in headless mode.
         """
         self.headless = headless
+        self.use_proxy = use_proxy
+        self.proxies = proxies
         # Driver instance is created within the get_likes method in this version
         # to strictly follow the original script's flow.
 
@@ -70,7 +73,12 @@ class InstagramPostScraper:
 
         options = uc.ChromeOptions()
         options.headless = self.headless
-
+        # handler proxy
+        if self.use_proxy:
+            if self.proxies is None:
+                raise ValueError("Proxy is required when use_proxy is True")
+            else:
+                options.add_argument(f"--proxy-server={self._get_proxy_random_from_list()}")
         driver = None # Define driver here to ensure it's available in finally block
         extracted_likes_count = None # Variable to store the result
 
@@ -175,3 +183,9 @@ class InstagramPostScraper:
 
         # Return the final result (either the count or None)
         return extracted_likes_count
+    
+    def _get_proxy_random_from_list(self) -> str:
+        """
+        Get a random proxy from the list of proxies.
+        """
+        return random.choice(self.proxies)
