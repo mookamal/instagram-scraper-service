@@ -158,3 +158,91 @@ class InstagramPostScraper:
         proxy = random.choice(self.proxies)
         session = self._get_session(proxy)
         return self._fetch_likes_via_graphql(session, shortcode)
+
+class InstagramUserScraper:
+    """
+    Fetches Instagram user profile data (including follower count)
+    via the private web_profile_info endpoint. Uses ProxySession
+    to reuse cookies and UA per proxy for 24h.
+    """
+
+    PROFILE_URL = "https://www.instagram.com/api/v1/users/web_profile_info/"
+
+    def __init__(self,
+                 proxies: list[str],
+                 headless: bool = True,
+                 wait_time: int = 1):
+        """
+        Args:
+          proxies: list of proxy server strings, e.g. ["http://ip:port", ...]
+          headless: whether to run browser in headless mode
+          wait_time: seconds to wait after page load to collect cookies
+        """
+        if not proxies:
+            raise ValueError("At least one proxy must be provided")
+        self.proxies = proxies
+        self.headless = headless
+        self.wait_time = wait_time
+        # map proxy -> ProxySession
+        self.sessions: dict[str, ProxySession] = {}
+
+    def _get_session(self, proxy: str) -> ProxySession:
+        """
+        Return a valid (not expired) ProxySession for given proxy,
+        refreshing it if needed.
+        """
+        sess = self.sessions.get(proxy)
+        if sess is None or sess.is_expired():
+            sess = ProxySession(proxy, self.headless, self.wait_time)
+            # hit a dummy page to initialize cookies/UA
+            sess.refresh(url="https://www.instagram.com/")
+            self.sessions[proxy] = sess
+        return sess
+
+    def get_user_info(self, username: str) -> dict | None:
+        """
+        Public method to fetch full user profile JSON for given username.
+        Returns the 'user' object from the response, or None on failure.
+        """
+        proxy = random.choice(self.proxies)
+        session = self._get_session(proxy)
+
+        params = {"username": username}
+        headers = {
+            "Accept": "*/*",
+            "Accept-Language": "en",
+            "Referer": f"https://www.instagram.com/{username}/",
+            "User-Agent": session.user_agent,
+            "X-CSRFToken": session.cookies.get("csrftoken", ""),
+            "X-IG-App-ID": "936619743392459",
+            "X-Requested-With": "XMLHttpRequest",
+        }
+
+        resp = requests.get(
+            self.PROFILE_URL,
+            headers=headers,
+            cookies=session.cookies,
+            params=params,
+            timeout=10
+        )
+
+        if resp.status_code != 200:
+            logger.error(f"Profile request failed [{resp.status_code}]: {resp.text}")
+            return None
+
+        try:
+            data = resp.json()
+            return data["data"]["user"]
+        except Exception as e:
+            logger.error(f"Error parsing profile JSON: {e}")
+            return None
+
+    def get_follower_count(self, username: str) -> int | None:
+        """
+        Convenience method to return only the follower count for a user.
+        """
+        user = self.get_user_info(username)
+        if not user:
+            return None
+        # 'edge_followed_by' holds follower count
+        return user.get("edge_followed_by", {}).get("count")
