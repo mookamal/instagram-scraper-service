@@ -3,7 +3,13 @@ import json
 import undetected_chromedriver as uc
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import random
-# Note: No new logging imports added as per request
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 
 # --- Start: Original __del__ patch ---
 # This patch addresses a potential OSError when uc.Chrome closes on some systems.
@@ -90,7 +96,7 @@ class InstagramPostScraper:
             driver.execute_cdp_cmd("Network.enable", {})
 
             # 3. Navigate to the page
-            # print(f"Navigating to: {url}") # Commented out direct print
+            logger.info(f"Navigating to: {url}")
             driver.get(url)
 
             # 4. Wait for XHR requests to load (Original fixed wait)
@@ -101,14 +107,14 @@ class InstagramPostScraper:
             # print("Gathering performance logs...") # Commented out direct print
             logs = driver.get_log("performance")
 
-            # print(f"Processing {len(logs)} log entries...") # Commented out direct print
+            logger.info(f"Gathering {len(logs)} performance logs...")
             for entry in logs:
                 try:
                     message_str = entry.get("message", "{}")
                     message_data = json.loads(message_str)
                     message = message_data.get("message", {})
                 except json.JSONDecodeError:
-                    # print("Skipping log entry due to JSON decode error") # Commented out direct print
+                    logger.info(f"Error decoding JSON: {message_str}")
                     continue # Skip malformed log entries
 
                 # Only interested in specific network events (Original Filter)
@@ -135,8 +141,7 @@ class InstagramPostScraper:
                          {"requestId": request_id}
                      )
                 except Exception as cdp_error:
-                    # This might happen if the response is no longer available or requestId is invalid
-                    # print(f"CDP Error getting body for {request_id}: {cdp_error}") # Commented out direct print
+                    logger.error(f"CDP Error getting body for {request_id}: {cdp_error}")
                     continue # Skip if we cannot get the body
 
                 body = body_data.get("body", "")
@@ -151,9 +156,10 @@ class InstagramPostScraper:
                     likes_value = self._extract_likes_from_json(payload) # Use the internal method
 
                     if likes_value is not None:
-                        # print(f"Successfully extracted likes: {likes_value}") # Commented out direct print
+                        logging.info(f"Successfully extracted likes: {likes_value}")
                         extracted_likes_count = likes_value
                         break # Stop the loop after the first successful extraction (Original logic)
+
 
                 except json.JSONDecodeError:
                     # print(f"Body for requestId {request_id} is not valid JSON.") # Commented out direct print
@@ -176,10 +182,9 @@ class InstagramPostScraper:
             if driver:
                 try:
                     driver.quit()
-                    # print("Browser closed.") # Commented out direct print
+                    logger.info("Browser closed.")
                 except Exception as e:
-                    # print(f"Error closing the driver: {e}") # Commented out direct print
-                    pass # Suppress errors during cleanup
+                    logger.error(f"Error closing the driver: {e}")
 
         # Return the final result (either the count or None)
         return extracted_likes_count
