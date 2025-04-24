@@ -71,6 +71,8 @@ class InstagramPostScraper:
 
     def __init__(self,
                  proxies: list[str],
+                 proxy_username: str = "",
+                 proxy_password: str = "",
                  headless: bool = True,
                  wait_time: int = 1):
         """
@@ -82,6 +84,8 @@ class InstagramPostScraper:
         if not proxies:
             raise ValueError("At least one proxy must be provided")
         self.proxies = proxies
+        self.proxy_username = proxy_username
+        self.proxy_password = proxy_password
         self.headless = headless
         self.wait_time = wait_time
         # map proxy -> ProxySession
@@ -133,6 +137,9 @@ class InstagramPostScraper:
             "server_timestamps": "true",
             "doc_id": "8845758582119845"
         }
+        if self.proxy_username and self.proxy_password:
+            split_proxy = proxy.split("//")
+            proxy = f"{split_proxy[0]}//{proxy_username}:{proxy_password}@{split_proxy[1]}"
         resp = requests.post(
             self.GRAPHQL_URL,
             headers=headers,
@@ -171,6 +178,8 @@ class InstagramUserScraper:
 
     def __init__(self,
                  proxies: list[str],
+                 proxy_username: str = "",
+                 proxy_password: str = "",
                  headless: bool = True,
                  wait_time: int = 1):
         """
@@ -184,6 +193,8 @@ class InstagramUserScraper:
         self.proxies = proxies
         self.headless = headless
         self.wait_time = wait_time
+        self.proxy_username = proxy_username
+        self.proxy_password = proxy_password
         # map proxy -> ProxySession
         self.sessions: dict[str, ProxySession] = {}
 
@@ -218,6 +229,9 @@ class InstagramUserScraper:
             "X-IG-App-ID": "936619743392459",
             "X-Requested-With": "XMLHttpRequest",
         }
+        if self.proxy_username and self.proxy_password:
+            split_proxy = proxy.split("//")
+            proxy = f"{split_proxy[0]}//{proxy_username}:{proxy_password}@{split_proxy[1]}"
 
         resp = requests.get(
             self.PROFILE_URL,

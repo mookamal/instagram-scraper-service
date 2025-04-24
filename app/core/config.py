@@ -20,6 +20,10 @@ class Settings(BaseSettings):
 
     WAIT_TIME: int = int(os.getenv("WAIT_TIME", 2))
 
+    PROXY_USERNAME: str = os.getenv("PROXY_USERNAME", "")
+
+    PROXY_PASSWORD: str = os.getenv("PROXY_PASSWORD", "")
+
     class Config:
         # Specifies the .env file to load variables from
         env_file = ".env"

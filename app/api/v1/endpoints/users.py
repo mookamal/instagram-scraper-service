@@ -11,7 +11,7 @@ from app.core.config import settings
 router = APIRouter()
 
 # Instantiate the scraper. Consider pooling or lifespan management for high traffic.
-scraper = InstagramUserScraper(proxies=settings.PROXIES)
+scraper = InstagramUserScraper(proxies=settings.PROXIES,proxy_username=settings.PROXY_USERNAME,proxy_password=settings.PROXY_PASSWORD)
 
 @router.get(
     "/users/{username}/follower_count",

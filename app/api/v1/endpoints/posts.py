@@ -8,7 +8,7 @@ from app.core.security import verify_api_key # Import the security dependency
 from app.core.config import settings # Import settings to get headless config
 
 router = APIRouter()
-scraper = InstagramPostScraper(proxies=settings.PROXIES)
+scraper = InstagramPostScraper(proxies=settings.PROXIES,proxy_username=settings.PROXY_USERNAME,proxy_password=settings.PROXY_PASSWORD)
 
 @router.get(
     "/posts/{post_id}/likes",
