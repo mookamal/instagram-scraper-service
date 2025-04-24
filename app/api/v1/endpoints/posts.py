@@ -8,6 +8,7 @@ from app.core.security import verify_api_key # Import the security dependency
 from app.core.config import settings # Import settings to get headless config
 
 router = APIRouter()
+scraper = InstagramPostScraper(proxies=settings.PROXIES)
 
 @router.get(
     "/posts/{post_id}/likes",
@@ -26,11 +27,10 @@ async def get_post_likes(
 
     # Instantiate scraper for this request using headless setting from config
     # Note: Consider instance pooling or lifespan management for high traffic
-    scraper = InstagramPostScraper(headless=settings.SCRAPER_HEADLESS,use_proxy=settings.USE_PROXY,proxies=settings.PROXIES,wait_time=settings.WAIT_TIME)
     likes = None
     try:
         # Execute the scraping task
-        likes = scraper.get_likes(post_url) # This method handles driver creation/closing internally now
+        likes = scraper.get_likes(post_id) # This method handles driver creation/closing internally now
 
         if likes is not None:
             return LikeResponse(post_id=post_id, likes_count=likes, status="success")
