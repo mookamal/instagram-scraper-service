@@ -26,7 +26,7 @@ async def get_post_likes(
 
     # Instantiate scraper for this request using headless setting from config
     # Note: Consider instance pooling or lifespan management for high traffic
-    scraper = InstagramPostScraper(headless=settings.SCRAPER_HEADLESS,use_proxy=settings.USE_PROXY,proxies=settings.PROXIES)
+    scraper = InstagramPostScraper(headless=settings.SCRAPER_HEADLESS,use_proxy=settings.USE_PROXY,proxies=settings.PROXIES,wait_time=settings.WAIT_TIME)
     likes = None
     try:
         # Execute the scraping task

@@ -30,7 +30,7 @@ class InstagramPostScraper:
     Scrapes Instagram post likes by intercepting network requests.
     This class structure mirrors the logic of the original script.
     """
-    def __init__(self, headless: bool = True, use_proxy: bool = False, proxies: list[str] | None = None):
+    def __init__(self, headless: bool = True, use_proxy: bool = False, proxies: list[str] | None = None, wait_time: int = 2):
         """
         Initializes the scraper configuration.
         Args:
@@ -39,6 +39,7 @@ class InstagramPostScraper:
         self.headless = headless
         self.use_proxy = use_proxy
         self.proxies = proxies
+        self.wait_time = wait_time
         # Driver instance is created within the get_likes method in this version
         # to strictly follow the original script's flow.
 
@@ -104,7 +105,7 @@ class InstagramPostScraper:
 
             # 4. Wait for XHR requests to load (Original fixed wait)
             # print("Waiting for network requests...") # Commented out direct print
-            time.sleep(4)
+            time.sleep(self.wait_time)
 
             # 5. Gather all performance logs
             # print("Gathering performance logs...") # Commented out direct print

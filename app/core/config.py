@@ -18,6 +18,8 @@ class Settings(BaseSettings):
 
     PROXIES: list[str] = os.getenv("PROXIES", "").split(',')
 
+    WAIT_TIME: int = int(os.getenv("WAIT_TIME", 2))
+
     class Config:
         # Specifies the .env file to load variables from
         env_file = ".env"
