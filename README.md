@@ -48,6 +48,6 @@ A high-performance API service built with **FastAPI** to scrape public data from
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/your-username/instagram-scraper-service.git
+git clone https://github.com/mookamal/instagram-scraper-service.git
 cd instagram-scraper-service
 pip install -r requirements.txt
